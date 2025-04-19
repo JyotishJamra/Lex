@@ -1,0 +1,58 @@
+%{
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_WORD_LENGTH 100
+
+// Function to find the smallest word
+void find_smallest_word(char *word) {
+    static char smallest[MAX_WORD_LENGTH];
+    static int min_len = MAX_WORD_LENGTH;
+
+    int word_len = strlen(word);
+
+    // Check if the current word is smaller
+    if (word_len < min_len) {
+        min_len = word_len;
+        strncpy(smallest, word, word_len + 1);  // Copy the smallest word
+    }
+}
+
+// Main function to print the smallest word after processing
+void print_smallest_word() {
+    printf("Smallest word: %s\n", smallest);
+    printf("Length: %d\n", min_len);
+}
+
+%}
+
+%option noyywrap
+
+%%
+[ \t\n]+      ; // Ignore spaces and newlines
+
+[a-zA-Z]+     { 
+                find_smallest_word(yytext);
+              }
+
+.|\n          ; // Ignore other characters
+
+%%
+
+int main() {
+    printf("Enter a sentence or words to find the smallest word:\n");
+    yylex();
+    print_smallest_word();  // Output the smallest word after input is processed
+    return 0;
+}
+
+
+Input:
+
+The quick brown fox
+
+
+Output:
+
+Smallest word: Hello
+Length: 5
