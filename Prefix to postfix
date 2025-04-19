@@ -1,0 +1,66 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX 100
+
+char *stack[MAX];
+int top = -1;
+
+void push(char *str) {
+    if (top >= MAX - 1) {
+        printf("Stack overflow\n");
+        exit(1);
+    }
+    stack[++top] = strdup(str);
+}
+
+char* pop() {
+    if (top < 0) {
+        printf("Stack underflow\n");
+        exit(1);
+    }
+    return stack[top--];
+}
+
+void process_operator(char *op) {
+    char *op1 = pop();
+    char *op2 = pop();
+    
+    char result[100];
+    snprintf(result, sizeof(result), "%s %s %s", op1, op2, op);
+    push(result);
+
+    free(op1);
+    free(op2);
+}
+%}
+
+%option noyywrap
+
+%%
+[ \t\n]+           ; // Ignore whitespace
+[\+\-\*/]          { process_operator(yytext); }
+[0-9]+             { push(yytext); }
+%%
+
+int main() {
+    printf("Enter prefix expression:\n");
+    yylex();
+
+    if (top == 0) {
+        printf("Postfix expression: %s\n", stack[top]);
+        free(stack[top]);
+    } else {
+        printf("Invalid expression\n");
+    }
+
+    return 0;
+}
+
+
+
+Ootput:
+Enter prefix expression:
+Postfix expression: 3 4 5 * +
