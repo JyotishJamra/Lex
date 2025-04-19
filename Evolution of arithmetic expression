@@ -1,0 +1,86 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+
+#define MAX 100
+
+typedef struct {
+    char str[100];
+} Expr;
+
+Expr stack[MAX];
+int top = -1;
+
+void push(char *expr) {
+    if (top >= MAX - 1) {
+        printf("Stack Overflow\n");
+        exit(1);
+    }
+    strcpy(stack[++top].str, expr);
+}
+
+char* pop() {
+    if (top < 0) {
+        printf("Stack Underflow\n");
+        exit(1);
+    }
+    return stack[top--].str;
+}
+
+void evaluate(char op) {
+    char *b = pop();
+    char *a = pop();
+
+    int res;
+    int op1 = atoi(a);
+    int op2 = atoi(b);
+
+    switch (op) {
+        case '+': res = op1 + op2; break;
+        case '-': res = op1 - op2; break;
+        case '*': res = op1 * op2; break;
+        case '/': res = op1 / op2; break;
+    }
+
+    char temp[100];
+    sprintf(temp, "%d", res);
+
+    printf("=> %d %c %d = %d\n", op1, op, op2, res);
+    push(temp);
+}
+%}
+
+%option noyywrap
+
+%%
+[ \t\n]+         ; // Ignore spaces
+[0-9]+           { push(yytext); }
+[\+\-\*/]        { evaluate(yytext[0]); }
+%%
+
+int main() {
+    printf("Enter space-separated postfix expression (e.g. 3 4 5 * +):\n");
+    yylex();
+
+    if (top == 0) {
+        printf("Final Result: %s\n", stack[top].str);
+    } else {
+        printf("Invalid expression\n");
+    }
+
+    return 0;
+}
+
+
+Input:
+
+3 4 5 * +
+
+Output:
+
+Enter space-separated postfix expression (e.g. 3 4 5 * +):
+=> 4 * 5 = 20
+=> 3 + 20 = 23
+Final Result: 23
